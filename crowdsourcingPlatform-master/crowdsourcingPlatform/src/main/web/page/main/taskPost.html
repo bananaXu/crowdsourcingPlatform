@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Carousel Template for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom styles for this template -->
+    <link href="../../css/carousel.css" rel="stylesheet">
+
+    <!-- VUE -->
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- axios  -->
+    <script src="https://cdn.staticfile.org/axios/0.18.0/axios.min.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/element-ui/2.4.9/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://cdn.staticfile.org/element-ui/2.4.9/index.js"></script>
+  </head>
+<!-- NAVBAR
+================================================== -->
+  <body>
+  <div id="app" style="background: #f7f7f7">
+    <!-- Wrap the rest of the page in another container to center all the content. -->
+    <div class="container marketing">
+      <!-- START THE FEATURETTES -->
+      <hr class="featurette-divider" style="margin-bottom: 10px">
+      <el-row>
+          <el-col :span="16">
+             <el-card class="box-card" shadow="hover">
+            <div slot="header" class="clearfix">
+              <H4>填写您的任务信息</H4>
+            </div>
+            <el-form ref="task" :model="task" label-width="80px" style="width: 580px">
+              <el-form-item label="任务名称">
+                <el-input v-model="task.name"></el-input>
+              </el-form-item>
+              <el-form-item label="任务类型">
+                <el-select v-model="task.type" placeholder="请选择任务类型">
+                  <el-option label="软件众包" value="1"></el-option>
+                  <el-option label="时空总包" value="2"></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="开发语言">
+                <el-select   filterable placeholder="请选择" v-model="task.properties.skills" style="width: 90%">
+                  <el-option
+                          v-for="item in skills.developmentLanguage"
+                          :key="item.value"
+                          :label="item.value"
+                          :value="item.value">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="任务时间">
+                <el-col :span="11">
+                  <el-date-picker type="datetime" placeholder="预计起始时间" v-model="task.properties.expStartTime" style="width: 100%;"></el-date-picker>
+                </el-col>
+                <el-col class="line" :span="2" sttle>-</el-col>
+                <el-col :span="11">
+                  <el-date-picker type="datetime" placeholder="预计完成时间" v-model="task.properties.expEndTime" style="width: 100%;"></el-date-picker>
+                </el-col>
+              </el-form-item>
+              <el-form-item label="需求人数">
+                <template>
+                  <el-input-number v-model.lazy="task.properties.crowdNum"  :min="1"  label="描述文字" @change="onCrowdNumChange"></el-input-number>
+                </template>
+              </el-form-item>
+
+              <el-form-item v-if="task.properties.crowdNum>1" v-for="i in task.properties.crowdNum" :label="'模块'+i">
+                <el-form-item label="模块名称">
+                  <el-input v-model="subTasks[i].name"></el-input>
+                </el-form-item>
+                <el-form-item label="预计酬劳">
+                  <template>
+                    <el-input-number v-model="subTasks[i].properties.price" :precision="2" :step="0.1" :min="0"></el-input-number>
+                    <label style="padding-left: 10px">元</label>
+                  </template>
+                </el-form-item>
+                <el-form-item label="需求描述">
+                    <el-input
+                            type="textarea"
+                            :rows="2"
+                            placeholder="请输入内容"
+                            v-model="subTasks[i].properties.description">
+                    </el-input>
+                </el-form-item>
+              </el-form-item>
+
+              <el-form-item v-if="task.properties.crowdNum==1" label="预计酬劳">
+                <template>
+                  <el-input-number v-model="task.properties.price" :precision="2" :step="0.1" :min="0"></el-input-number>
+                  <label style="padding-left: 10px">元</label>
+                </template>
+              </el-form-item>
+              <el-form-item v-show="task.properties.crowdNum==1" label="任务描述">
+                <div id="editor">
+                </div>
+              </el-form-item>
+              <el-form-item>
+                <el-button type="primary" @click="onPost">立即发布</el-button>
+                <el-button>取消</el-button>
+              </el-form-item>
+            </el-form>
+          </el-card>
+          </el-col>
+          <el-col :span="8" style="padding-left: 10px">
+            <el-card class="box-card" shadow="hover">
+              <div slot="header" class="clearfix">
+                <span>发布流程</span>
+              </div>
+              <div style="height: 300px;">
+                <el-steps direction="vertical" :active="1">
+                  <el-step title="发布需求"></el-step>
+                  <el-step title="筛选合适的接包方" description="若选择自动派单则将由系统挑选接包方"></el-step>
+                  <el-step title="签订电子合同、进入实施"></el-step>
+                  <el-step title="验收完成"></el-step>
+                </el-steps>
+              </div>
+            </el-card>
+          </el-col>
+      </el-row>
+
+      <hr class="featurette-divider">
+      <!-- /END THE FEATURETTES -->
+
+      <!-- FOOTER -->
+      <footer>
+        <p class="pull-right"><a href="#">Back to top</a></p>
+        <p>&copy; 2016 Company, Inc. &middot; <a href="#">Privacy</a> &middot; <a href="#">Terms</a></p>
+      </footer>
+
+    </div><!-- /.container -->
+  </div>
+  <!--导航栏-->
+  <div id="login">
+    <xinhuo-navbar @finishlogin="onGotToken" v-bind:active-index="3"></xinhuo-navbar>
+  </div>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+    <!-- Just to make our placeholder images work. Don't actually copy the next line! -->
+    <script src="../../assets/js/vendor/holder.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+  <script src="../js/navbarComponent.js"></script>
+  <script src="https://unpkg.com/wangeditor@3.1.1/release/wangEditor.min.js"></script>
+  <script src="../js/taskPost.js"></script>
+  <script type="text/javascript">
+      var E = window.wangEditor
+      var editor = new E('#editor')
+      // 或者 var editor = new E( document.getElementById('editor') )
+      // 自定义菜单配置
+      editor.customConfig.menus = [
+          'head',
+          'bold',
+          'italic',
+          'underline'
+      ]
+      editor.create();
+      $(".w-e-text-container").css("z-index",100);
+      $(".w-e-menu").css("z-index",100);
+
+  </script>
+</html>
+
+

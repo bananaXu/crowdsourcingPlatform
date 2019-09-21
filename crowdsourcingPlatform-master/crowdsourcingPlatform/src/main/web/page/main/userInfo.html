@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Carousel Template for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
+    <!--[if lt IE 9]><script src="../../assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <script src="../../assets/js/ie-emulation-modes-warning.js"></script>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- Custom styles for this template -->
+    <link href="../../css/carousel.css" rel="stylesheet">
+
+    <!-- VUE -->
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- axios  -->
+    <script src="https://cdn.staticfile.org/axios/0.18.0/axios.min.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/element-ui/2.4.9/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://cdn.staticfile.org/element-ui/2.4.9/index.js"></script>
+  </head>
+<!-- NAVBAR
+================================================== -->
+  <body>
+  <div id="app" style="background: #f7f7f7">
+    <!-- Wrap the rest of the page in another container to center all the content. -->
+    <div class="container marketing">
+      <!-- START THE FEATURETTES -->
+      <hr class="featurette-divider" style="margin-bottom: 10px">
+      <el-row>
+        <el-card class="box-card" shadow="hover">
+          <el-tabs tab-position="left" @tab-click="editing=false;userInfo=tempInfo? tempInfo:userInfo">
+            <el-tab-pane label="基本信息"><el-card class="box-card" shadow="hover">
+              <div slot="header" class="clearfix">
+                <el-col :span="6" style="padding-left: 10px"> <B style="font-size: 17px">{{editing? '编辑':''}}个人信息</B></el-col>
+                <el-col :span="18" style="text-align: right"><el-button v-if="!editing" type="primary" size="mini" @click="editing=true;tempInfo=JSON.parse(JSON.stringify(userInfo));; ">编辑</el-button></el-col>
+              </div>
+
+              <el-form ref="userInfo" :model="userInfo" label-width="100px" style="width: 580px">
+                <el-form-item label="昵称：">
+                  <el-input v-if="editing" v-model="userInfo.name"></el-input>
+                  <span v-else >{{userInfo.name}}</span>
+                </el-form-item>
+                <el-form-item  label="性别：">
+                  <el-radio-group v-if="editing" v-model="userInfo.info.sex">
+                    <el-radio :label="1">男</el-radio>
+                    <el-radio :label="0">女</el-radio>
+                  </el-radio-group>
+                  <span v-else >{{userInfo.info.sex? '男':'女'}}</span>
+                </el-form-item>
+                <el-form-item label="工作年限：">
+                  <el-select v-if="editing" v-model="userInfo.info.workYears" placeholder="请选择">
+                    <el-option
+                            v-for="item in options"
+                            :key="item"
+                            :label="item<10? item+'年':'大于等于10年'"
+                            :value="item">
+                    </el-option>
+                  </el-select>
+                  <span v-else >{{userInfo.info.workYears>=10? '大于等于10年':userInfo.info.workYears+'年'}}</span>
+                </el-form-item>
+                <el-form-item  label="就职公司：">
+                  <el-input v-if="editing" v-model="userInfo.info.company"></el-input>
+                  <span v-else >{{userInfo.info.company}}</span>
+                </el-form-item>
+                <el-form-item  label="个人简介：">
+                  <el-input
+                          v-if="editing"
+                          type="textarea"
+                          :rows="2"
+                          placeholder="请输入个人简介"
+                          v-model="userInfo.info.description">
+                  </el-input>
+                  <span v-else >{{userInfo.info.description}}</span>
+                </el-form-item>
+                <el-form-item label="QQ：">
+                  <el-input v-if="editing" v-model="userInfo.info.qq"></el-input>
+                  <span v-else >{{userInfo.info.qq}}</span>
+                </el-form-item>
+                <el-form-item label="微信：">
+                  <el-input v-if="editing" v-model="userInfo.info.wechat"></el-input>
+                  <span v-else >{{userInfo.info.wechat}}</span>
+                </el-form-item>
+                <el-form-item>
+                  <el-button v-if="editing" type="primary" @click="onPost">提交</el-button>
+                  <el-button v-if="editing" @click="editing=false;userInfo=tempInfo">取消</el-button>
+                </el-form-item>
+              </el-form>
+            </el-card></el-tab-pane>
+            <el-tab-pane label="时空众包"><el-card class="box-card" shadow="hover">
+              <el-alert
+                      title="暂时没有配置，敬请期待！"
+                      type="info"
+                      >
+              </el-alert>
+            </el-card></el-tab-pane>
+            <el-tab-pane label="软件众包"><el-card class="box-card" shadow="hover">
+              <div slot="header" class="clearfix">
+                <el-col :span="6" style="padding-left: 10px"> <B style="font-size: 17px">{{editing? '编辑':''}}软件众包相关信息</B></el-col>
+                <el-col :span="18" style="text-align: right"><el-button v-if="!editing" type="primary" size="mini" @click="editing=true;tempInfo=JSON.parse(JSON.stringify(userInfo));; ">编辑</el-button></el-col>
+              </div>
+              <el-form ref="userInfo" :model="userInfo" label-width="100px" style="width: 100%">
+                <el-form-item label="开发技能：">
+                  <el-select  :disabled="!editing" multiple filterable placeholder="请选择" v-model="userInfo.extention.developmentLanguage" style="width: 90%">
+                    <el-option
+                            v-for="item in skills.developmentLanguage"
+                            :key="item.value"
+                            :label="item.value"
+                            :value="item.value">
+                    </el-option>
+                  </el-select>
+                  <span v-else >{{userInfo.name}}</span>
+                </el-form-item>
+                <el-form-item  label="活跃时间：">
+                  <!--<el-slider-->
+                          <!--v-if="editing"-->
+                          <!--v-model="userInfo.extention.activeTime"-->
+                          <!--show-tooltip-->
+                          <!--:format-tooltip="formatSlider"-->
+                          <!--range-->
+                          <!--:disabled="!editing"-->
+                          <!--show-stops-->
+                          <!--:max="23">-->
+                  <!--</el-slider>-->
+                  <template v-if="editing">
+                    <el-select
+                            v-model="userInfo.extention.activeTime"
+                            multiple
+                            collapse-tags
+                            laceholder="请选择">
+
+                      <el-option-group
+                              label="上午"
+                              :key="100"
+                        >
+                        <el-option
+                                v-for="o in [7,8,9,10,11,12]"
+                                :key="o"
+                                :label="time2Str([o])"
+                                :value="o"
+                        >
+                        </el-option>
+                      </el-option-group>
+                      <el-option-group
+                              label="下午"
+                              :key="200"
+                      >
+                        <el-option
+                                v-for="o in [13,14,15,16,17,18,19,20,21,22]"
+                                :key="o"
+                                :label="time2Str([o])"
+                                :value="o"
+                        >
+                        </el-option>
+                      </el-option-group>
+                      <el-option-group
+                              label="夜间"
+                              :key="300"
+                      >
+                        <el-option
+                                v-for="o in [23,24,1,2,3,4,5,6]"
+                                :key="o"
+                                :label="time2Str([o])"
+                                :value="o"
+                        >
+                        </el-option>
+                      </el-option-group>
+                    </el-select>
+                    {{time2Str(userInfo.extention.activeTime)}}
+                  </template>
+
+                  <!--<span v-else >{{formatSlider(userInfo.extention.activeTime[0])+'~'+formatSlider(userInfo.extention.activeTime[1])}}</span>-->
+                  <span v-else >{{time2Str(userInfo.extention.activeTime)}}</span>
+                </el-form-item>
+                <el-form-item  v-if="!editing" label="技能评分：">
+                  <el-row v-for="item in userInfo.extention.developmentLanguage">
+                    <el-col :span="3" style="text-align: right;">
+                      {{item+'：'}}
+                    </el-col>
+                    <el-col :span="21" style="margin-top: 10px;">
+                      <el-rate
+                              v-bind:value="userInfo.skillList[item]? (userInfo.skillList[item]*5).toFixed(1):2.5"
+                              disabled
+                              show-score
+                              text-color="#ff9900"
+                              score-template="{value}">
+                      </el-rate>
+                    </el-col>
+                  </el-row>
+                </el-form-item>
+                <el-form-item>
+                  <el-button v-if="editing" type="primary" @click="onPost">提交</el-button>
+                  <el-button v-if="editing" @click="editing=false;userInfo=tempInfo">取消</el-button>
+                </el-form-item>
+              </el-form>
+            </el-card></el-tab-pane>
+          </el-tabs>
+        </el-card>
+      </el-row>
+
+      <hr class="featurette-divider">
+      <!-- /END THE FEATURETTES -->
+
+      <!-- FOOTER -->
+      <footer>
+        <p class="pull-right"><a href="#">Back to top</a></p>
+        <p>&copy; 2016 Company, Inc. &middot; <a href="#">Privacy</a> &middot; <a href="#">Terms</a></p>
+      </footer>
+
+    </div><!-- /.container -->
+  </div>
+  <!--导航栏-->
+  <div id="login">
+    <xinhuo-navbar @finishlogin="onGotToken" v-bind:active-index="3"></xinhuo-navbar>
+  </div>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+    <!-- Just to make our placeholder images work. Don't actually copy the next line! -->
+    <script src="../../assets/js/vendor/holder.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+  <script src="../js/navbarComponent.js"></script>
+  <script src="../js/userInfo.js"></script>
+</html>
+
+
